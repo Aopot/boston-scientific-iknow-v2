@@ -92,7 +92,7 @@ export default function Header({ activeTab, onLogout }: HeaderProps) {
             className="flex items-center gap-3 p-1.5 pr-4 bg-white border border-slate-200 rounded-2xl hover:border-clinical-blue/20 transition-all shadow-sm group"
           >
             <div className="w-10 h-10 rounded-[14px] bg-gradient-to-br from-clinical-blue to-blue-400 flex items-center justify-center text-white font-bold text-lg border-2 border-white shadow-sm overflow-hidden">
-              王
+              K
             </div>
             <div className="flex flex-col text-left">
               <span className="text-sm font-bold text-slate-800 group-hover:text-clinical-blue transition-colors">
