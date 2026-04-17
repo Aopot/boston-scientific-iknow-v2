@@ -15,9 +15,7 @@ import {
   FileText,
   Download,
   CheckCircle2,
-  Activity,
-  History,
-  ClipboardList
+  Activity
 } from "lucide-react";
 
 interface PRERWorkflowProps {
@@ -27,51 +25,43 @@ interface PRERWorkflowProps {
 const steps = [
   { 
     id: 1, 
-    title: "上传内部销量数据", 
-    desc: "Internal Sales Data", 
-    requirement: "Excel/CSV", 
-    icon: FileSpreadsheet,
-    details: "上传本报告周期内的产品全球销量统计数据。"
+    title: "上传进口注册证", 
+    desc: "NMPA Registration Certificate", 
+    requirement: "PDF", 
+    icon: FileText,
+    details: "进口医疗器械注册证，是产品在中国合法上市销售的“身份证”，包含产品名称、注册人、有效期、适用范围等关键信息。"
   },
   { 
     id: 2, 
-    title: "上传不良事件数据", 
-    desc: "Adverse Events", 
-    requirement: "Excel/CSV", 
-    icon: Activity,
-    details: "导入来自各渠道的临床不良事件及投诉记录。"
+    title: "上传中文说明书", 
+    desc: "Instructions for Use (IFU)", 
+    requirement: "PDF", 
+    icon: FileText,
+    details: "产品中文说明书，包含使用方法、禁忌、不良反应、警示信息等，是 PRER 风险评估的重要依据之一。"
   },
   { 
     id: 3, 
-    title: "上传内部注册证数据", 
-    desc: "Registration Certificates", 
-    requirement: "PDF/Images", 
-    icon: FileText,
-    details: "同步各国家/地区的注册证更新及合规性证明。"
+    title: "上传不良事件汇总表", 
+    desc: "Adverse Events Summary", 
+    requirement: "XLSX", 
+    icon: FileSpreadsheet,
+    details: "报告周期内不良事件汇总表，记录国内外所有上报的不良反应/事件数据，是 PRER 风险分析的核心数据来源。"
   },
   { 
     id: 4, 
-    title: "上传注册信息", 
-    desc: "Registration Info", 
-    requirement: "System Integration/Sync", 
-    icon: History,
-    details: "整合最新的法规注册状态及变更申请信息。"
+    title: "上传召回事件报告", 
+    desc: "Recall Event Report", 
+    requirement: "PDF", 
+    icon: Activity,
+    details: "如报告周期内发生过产品召回，用于说明召回原因、范围与处理措施，是 PRER 风险控制措施的重要内容。"
   },
   { 
     id: 5, 
-    title: "上传医学信息", 
-    desc: "Medical/Clinical Info", 
-    requirement: "Clinical Trial Data", 
-    icon: ClipboardList,
-    details: "导入最新的临床试验数据及同行评审文献摘要。"
-  },
-  { 
-    id: 6, 
     title: "预览并生成报告", 
     desc: "Final Review & Generate", 
-    requirement: "Automated Generation", 
+    requirement: "DOC 输出", 
     icon: CheckCircle2,
-    details: "AI 自动整合数据并生成符合法规要求的 PRER 报告。"
+    details: "基于上传文件，AI 自动整合数据并生成 PRER 主报告，支持预览与下载。"
   },
 ];
 
@@ -87,9 +77,11 @@ export default function PRERWorkflow({ onBack }: PRERWorkflowProps) {
   const [hasScrolledToBottom, setHasScrolledToBottom] = useState(false);
   const [isFinalizeModalOpen, setIsFinalizeModalOpen] = useState(false);
   const previewScrollRef = useRef<HTMLDivElement>(null);
+  const finalStep = steps.length;
+  const previewVerifyTimerRef = useRef<number | null>(null);
 
   const handleMockUpload = () => {
-    if (currentStep === 6 || isUploading) return;
+    if (currentStep === finalStep || isUploading) return;
     
     setIsUploading(true);
     
@@ -102,10 +94,29 @@ export default function PRERWorkflow({ onBack }: PRERWorkflowProps) {
   };
 
   const goToStep = (step: number) => {
+    if (previewVerifyTimerRef.current) {
+      window.clearTimeout(previewVerifyTimerRef.current);
+      previewVerifyTimerRef.current = null;
+    }
+
     setCurrentStep(step);
     setIsStepReady(false);
     setShowToast(false);
     setIsHovered(false);
+
+    if (step === finalStep) {
+      setHasScrolledToBottom(false);
+      setIsPreviewVerified(false);
+      setIsFinalizeModalOpen(false);
+      setIsEnglishReport(false);
+      previewVerifyTimerRef.current = window.setTimeout(() => {
+        setIsPreviewVerified(true);
+      }, 1200);
+    } else {
+      setIsPreviewVerified(false);
+      setHasScrolledToBottom(false);
+      setIsFinalizeModalOpen(false);
+    }
   };
 
   const prevStep = () => {
@@ -115,14 +126,14 @@ export default function PRERWorkflow({ onBack }: PRERWorkflowProps) {
   };
 
   const handleConfirmContinue = () => {
-    if (currentStep === 6 || isUploading) return;
+    if (currentStep === finalStep || isUploading) return;
 
     if (!isStepReady) {
       handleMockUpload();
       return;
     }
 
-    goToStep(Math.min(currentStep + 1, 6));
+    goToStep(Math.min(currentStep + 1, finalStep));
   };
 
   const handleTranslateToEnglish = () => {
@@ -140,19 +151,12 @@ export default function PRERWorkflow({ onBack }: PRERWorkflowProps) {
   };
 
   useEffect(() => {
-    if (currentStep !== 6) return;
-
-    setHasScrolledToBottom(false);
-    setIsPreviewVerified(false);
-    setIsFinalizeModalOpen(false);
-    setIsEnglishReport(false);
-
-    const timer = setTimeout(() => {
-      setIsPreviewVerified(true);
-    }, 1200);
-
-    return () => clearTimeout(timer);
-  }, [currentStep]);
+    return () => {
+      if (previewVerifyTimerRef.current) {
+        window.clearTimeout(previewVerifyTimerRef.current);
+      }
+    };
+  }, []);
 
   const handlePreviewScroll = () => {
     const el = previewScrollRef.current;
@@ -162,20 +166,6 @@ export default function PRERWorkflow({ onBack }: PRERWorkflowProps) {
     const isAtBottom = el.scrollTop + el.clientHeight >= el.scrollHeight - threshold;
     if (isAtBottom) setHasScrolledToBottom(true);
   };
-
-  const summaryItems = isEnglishReport
-    ? [
-        { label: "Total Global Sales", value: "12,405 Units", detail: "+12.5% vs. last year" },
-        { label: "Adverse Event Rate", value: "0.02%", detail: "Below industry benchmark" },
-        { label: "Clinical Follow-up Completion", value: "98.4%", detail: "Meets regulatory requirements" },
-        { label: "Certificate Update Status", value: "Synced", detail: "42 countries covered" },
-      ]
-    : [
-        { label: "全球销量总计", value: "12,405 Units", detail: "同比 +12.5%" },
-        { label: "不良事件发生率", value: "0.02%", detail: "低于行业基准" },
-        { label: "临床回访完成率", value: "98.4%", detail: "符合法规要求" },
-        { label: "注册证更新状态", value: "已同步", detail: "覆盖 42 个国家" },
-      ];
 
   return (
     <div className="h-full flex flex-col bg-[#F9F8FF] -m-12 px-12 pt-12 pb-6 overflow-hidden relative" style={{ height: "calc(100vh - 50px)" }}>
@@ -246,12 +236,12 @@ export default function PRERWorkflow({ onBack }: PRERWorkflowProps) {
               <span className="text-sm font-bold tracking-tight">AI 智能助手</span>
             </div>
             <p className="text-[13px] font-medium leading-relaxed mb-4">
-              {currentStep === 6 
+              {currentStep === finalStep 
                 ? "数据整合已完成，您可以预览并下载最终的 PRER 报告。"
                 : `正在进行第 ${currentStep} 步：${steps[currentStep-1].title}。`}
             </p>
             <p className="text-[10px] text-slate-400 italic leading-relaxed">
-              {currentStep === 6 
+              {currentStep === finalStep 
                 ? "Data integration complete. You can preview and download the final PRER report."
                 : `Currently on step ${currentStep}: ${steps[currentStep-1].desc}.`}
             </p>
@@ -295,7 +285,7 @@ export default function PRERWorkflow({ onBack }: PRERWorkflowProps) {
         {/* Right Column: Main Content Card */}
         <div className="flex-1 overflow-hidden h-full flex flex-col min-h-0">
           <AnimatePresence mode="wait">
-            {currentStep < 6 ? (
+            {currentStep < finalStep ? (
               <motion.div
                 key={currentStep}
                 initial={{ opacity: 0, x: 40 }}
@@ -308,7 +298,7 @@ export default function PRERWorkflow({ onBack }: PRERWorkflowProps) {
                 <div className="px-10 py-4 border-b border-slate-50 flex items-center justify-between shrink-0">
                   <div className="space-y-1">
                     <div className="inline-flex px-3 py-1 rounded-full bg-[#B86F52]/10 text-[#B86F52] text-[11px] font-bold tracking-widest uppercase">
-                      Step {currentStep} / 6
+                      Step {currentStep} / {finalStep}
                     </div>
                     <h2 className="text-2xl font-bold text-slate-900 tracking-tight">
                       {steps[currentStep - 1].title}
@@ -405,26 +395,26 @@ export default function PRERWorkflow({ onBack }: PRERWorkflowProps) {
                 className="flex-1 flex flex-col bg-white rounded-[32px] border border-slate-200/60 shadow-xl shadow-slate-200/20 overflow-hidden mb-6"
               >
                 {/* Result Header */}
-                <div className="px-10 py-10 border-b border-slate-100 bg-slate-50/30 flex items-start justify-between gap-8">
+                <div className="px-10 py-6 border-b border-slate-100 bg-slate-50/30 flex items-start justify-between gap-8">
                   <div className="flex items-center gap-5">
-                    <div className="p-4 bg-clinical-blue text-white rounded-[20px] shadow-lg shadow-clinical-blue/20">
-                      <FileText size={32} />
+                    <div className="p-3 bg-clinical-blue text-white rounded-[18px] shadow-lg shadow-clinical-blue/20">
+                      <FileText size={28} />
                     </div>
                     <div>
                       <div className="flex items-center gap-3 mb-2">
-                        <h2 className="text-2xl font-black text-slate-900 tracking-tight">
-                          {isEnglishReport ? "Periodic Risk Evaluation Report (PRER)" : "定期风险评估报告 (PRER)"}
+                        <h2 className="text-xl font-black text-slate-900 tracking-tight">
+                          {isEnglishReport
+                            ? "Periodic Risk Evaluation Report"
+                            : "射频消融导管定期风险评价报告"}
                         </h2>
                         <span className="px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-700 text-[10px] font-black uppercase tracking-widest">
                           {isEnglishReport ? "OFFICIAL DRAFT" : "Official Draft"}
                         </span>
                       </div>
                       <div className="flex items-center gap-4 text-xs font-bold text-slate-400">
-                        <span>{isEnglishReport ? "Version: v1.0.4" : "版本: v1.0.4"}</span>
+                        <span>{isEnglishReport ? "Report No.: 1st" : "第 1 次报告"}</span>
                         <span className="w-1 h-1 bg-slate-200 rounded-full" />
-                        <span>{isEnglishReport ? "Date: Mar 5, 2026" : "日期: 2026年3月5日"}</span>
-                        <span className="w-1 h-1 bg-slate-200 rounded-full" />
-                        <span>ID: BSC-PRER-2026-001</span>
+                        <span>{isEnglishReport ? "Submitted: Nov 28, 2025" : "报告提交时间：2025年11月28日"}</span>
                       </div>
                     </div>
                   </div>
@@ -452,81 +442,332 @@ export default function PRERWorkflow({ onBack }: PRERWorkflowProps) {
                 <div
                   ref={previewScrollRef}
                   onScroll={handlePreviewScroll}
-                  className="flex-1 overflow-y-auto p-10 custom-scrollbar space-y-10 min-h-0"
+                  className="flex-1 overflow-y-auto p-8 custom-scrollbar space-y-6 min-h-0"
                 >
-                  {/* Section 1: Data Summary */}
-                  <section className="space-y-6">
-                    <div className="flex items-center gap-3">
-                      <div className="w-1.5 h-6 bg-clinical-blue rounded-full" />
-                      <h3 className="text-lg font-bold text-slate-800">
-                        {isEnglishReport ? "Section 1: Data Summary" : "Section 1: 数据摘要 (Data Summary)"}
-                      </h3>
-                    </div>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-                      {summaryItems.map((item, i) => (
-                        <div key={i} className="p-5 rounded-2xl bg-slate-50 border border-slate-100">
-                          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">{item.label}</p>
-                          <p className="text-xl font-black text-slate-800 mb-1">{item.value}</p>
-                          <p className="text-[11px] font-bold text-emerald-600">{item.detail}</p>
-                        </div>
-                      ))}
-                    </div>
-                  </section>
-
-                  {/* Section 2: AI Risk Assessment */}
-                  <section className="space-y-6">
-                    <div className="flex items-center gap-3">
-                      <div className="w-1.5 h-6 bg-clinical-blue rounded-full" />
-                      <h3 className="text-lg font-bold text-slate-800">
-                        {isEnglishReport ? "Section 2: AI Risk Assessment" : "Section 2: AI 风险评估 (AI Risk Assessment)"}
-                      </h3>
-                    </div>
-                    <div className="p-8 rounded-[24px] bg-clinical-blue/[0.02] border border-clinical-blue/10 relative overflow-hidden">
-                      <div className="absolute top-0 right-0 p-8 opacity-[0.03] text-clinical-blue">
-                        <Sparkles size={120} />
+                  <section className="space-y-8">
+                    <div className="text-center space-y-1">
+                      <div className="text-xl font-black text-slate-900 tracking-tight">
+                        {isEnglishReport ? "Periodic Risk Evaluation Report" : "射频消融导管定期风险评价报告"}
                       </div>
-                      <div className="prose prose-slate max-w-none relative z-10">
-                        <p className="text-slate-700 leading-relaxed mb-6">
-                          {isEnglishReport ? (
-                            <>
-                              Based on <strong>12,405</strong> units of sales data collected in this reporting period and <strong>2,400</strong> clinical follow-up records, the AI risk assessment indicates the stent system maintains an excellent benefit–risk profile in real-world clinical use.
-                            </>
-                          ) : (
-                            <>
-                              基于本报告周期内收集的 <strong>12,405</strong> 台设备的销售数据及 <strong>2,400</strong> 例临床回访记录，AI 风险评估模型分析显示：该支架系统在临床应用中的风险获益比保持在极佳水平。
-                            </>
-                          )}
-                        </p>
-                        <p className="text-slate-700 leading-relaxed mb-6">
-                          {isEnglishReport ? (
-                            <>
-                              Through semantic analysis of <strong>adverse event data</strong>, two minor deviations related to operating procedures were identified and automatically linked to the Step 4 registration change notes. The overall adverse event rate (0.02%) remains well below the ISO 14971 risk threshold.
-                            </>
-                          ) : (
-                            <>
-                              通过对 <strong>不良事件数据</strong> 的语义分析，识别出 2 例与操作规范相关的轻微偏差，已自动关联至第 4 步的注册变更说明中。整体不良事件发生率（0.02%）远低于 ISO 14971 定义的风险阈值。
-                            </>
-                          )}
-                        </p>
-                        <div className="flex items-start gap-3 p-4 bg-white border border-clinical-blue/10 rounded-xl shadow-sm italic text-sm text-slate-500">
-                          <Info size={16} className="text-clinical-blue shrink-0 mt-0.5" />
-                          {isEnglishReport
-                            ? "AI conclusion: This product meets EU MDR and FDA 21 CFR 822 safety requirements. Maintain the current clinical follow-up frequency; no additional CAPA actions are recommended."
-                            : "AI 结论：该产品符合欧盟 MDR 及 FDA 21 CFR 822 的安全性要求，建议维持当前的临床跟踪频率，无需额外的纠正或预防措施（CAPA）。"}
+                      <div className="text-[13px] font-bold text-slate-500">
+                        {isEnglishReport ? "1st Report" : "第 1 次报告"}
+                      </div>
+                    </div>
+
+                    <div className="rounded-2xl border border-slate-200/70 overflow-hidden bg-white shadow-sm">
+                      <table className="w-full text-sm border-collapse">
+                        <tbody className="divide-y divide-slate-100">
+                          <tr className="divide-x divide-slate-100">
+                            <td className="w-44 bg-slate-50 px-4 py-3 text-slate-500 font-bold">
+                              {isEnglishReport ? "Reporting Period" : "报告期"}
+                            </td>
+                            <td className="px-4 py-3 text-slate-800 font-bold">
+                              {isEnglishReport ? "Jan 1, 2022 – Feb 28, 2025" : "2022年01月01日至2025年2月28日"}
+                            </td>
+                            <td className="w-44 bg-slate-50 px-4 py-3 text-slate-500 font-bold">
+                              {isEnglishReport ? "Submission Date" : "报告提交时间"}
+                            </td>
+                            <td className="px-4 py-3 text-slate-800 font-bold">
+                              {isEnglishReport ? "Nov 28, 2025" : "2025年11月28日"}
+                            </td>
+                          </tr>
+                          <tr className="divide-x divide-slate-100">
+                            <td className="bg-slate-50 px-4 py-3 text-slate-500 font-bold">
+                              {isEnglishReport ? "Domestic Sales (This Period)" : "本期国内销量"}
+                            </td>
+                            <td className="px-4 py-3 text-slate-800 font-bold">
+                              {isEnglishReport ? "3,000 units" : "3000 个"}
+                            </td>
+                            <td className="bg-slate-50 px-4 py-3 text-slate-500 font-bold">
+                              {isEnglishReport ? "Overseas Sales (This Period)" : "本期境外销量"}
+                            </td>
+                            <td className="px-4 py-3 text-slate-800 font-bold">
+                              {isEnglishReport ? "8,000 units" : "8000 个"}
+                            </td>
+                          </tr>
+                          <tr className="divide-x divide-slate-100">
+                            <td className="bg-slate-50 px-4 py-3 text-slate-500 font-bold">
+                              {isEnglishReport ? "Adverse Event Reports (This Period)" : "本期不良事件报告数量"}
+                            </td>
+                            <td className="px-4 py-3 text-slate-800 font-bold">
+                              {isEnglishReport ? "1 cases" : "1 例"}
+                            </td>
+                            <td className="bg-slate-50 px-4 py-3 text-slate-500 font-bold">
+                              {isEnglishReport ? "Report Type" : "报告类别"}
+                            </td>
+                            <td className="px-4 py-3 text-slate-800 font-bold">
+                              {isEnglishReport ? "Initial Registration / Renewal" : "首次注册 / 延续注册"}
+                            </td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+
+                    <div className="rounded-2xl border border-slate-200/70 overflow-hidden bg-white shadow-sm">
+                      <table className="w-full text-sm border-collapse">
+                        <tbody className="divide-y divide-slate-100">
+                          <tr className="divide-x divide-slate-100">
+                            <td className="w-44 bg-slate-50 px-4 py-3 text-slate-500 font-bold">
+                              {isEnglishReport ? "Approval Date (Registration/Record)" : "产品注册/备案批准时间"}
+                            </td>
+                            <td className="px-4 py-3 text-slate-700 font-bold">
+                              {isEnglishReport ? "Jul 21, 2021" : "2021年07月21日"}
+                            </td>
+                            <td className="w-44 bg-slate-50 px-4 py-3 text-slate-500 font-bold">
+                              {isEnglishReport ? "Company" : "企业名称"}
+                            </td>
+                            <td className="px-4 py-3 text-slate-700 font-bold">
+                              {isEnglishReport ? "Boston Scientific International MedicalCo., Ltd." : "波科国际公司"}
+                            </td>
+                          </tr>
+                          <tr className="divide-x divide-slate-100">
+                            <td className="bg-slate-50 px-4 py-3 text-slate-500 font-bold">
+                              {isEnglishReport ? "Unified Social Credit Code" : "社会信用代码"}
+                            </td>
+                            <td className="px-4 py-3 text-slate-700 font-bold">913100006073791417</td>
+                            <td className="bg-slate-50 px-4 py-3 text-slate-500 font-bold">
+                              {isEnglishReport ? "Address" : "联系地址"}
+                            </td>
+                            <td className="px-4 py-3 text-slate-700 font-bold">
+                              {isEnglishReport
+                                ? " No. 763 Mengzi Rd., Huangpu District, Shanghai"
+                                : "上海市黄浦区蒙自路763号"}
+                            </td>
+                          </tr>
+                          <tr className="divide-x divide-slate-100">
+                            <td className="bg-slate-50 px-4 py-3 text-slate-500 font-bold">
+                              {isEnglishReport ? "Postal Code" : "邮编"}
+                            </td>
+                            <td className="px-4 py-3 text-slate-700 font-bold">200023</td>
+                            <td className="bg-slate-50 px-4 py-3 text-slate-500 font-bold">
+                              {isEnglishReport ? "Fax" : "传真"}
+                            </td>
+                            <td className="px-4 py-3 text-slate-700 font-bold">021-xxxxxx</td>
+                          </tr>
+                          <tr className="divide-x divide-slate-100">
+                            <td className="bg-slate-50 px-4 py-3 text-slate-500 font-bold">
+                              {isEnglishReport ? "Product Safety Department" : "负责产品安全的部门"}
+                            </td>
+                            <td className="px-4 py-3 text-slate-700 font-bold">
+                              {isEnglishReport ? "Quality" : "质量部"}
+                            </td>
+                            <td className="bg-slate-50 px-4 py-3 text-slate-500 font-bold">
+                              {isEnglishReport ? "Responsible Person" : "负责人"}
+                            </td>
+                            <td className="px-4 py-3 text-slate-700 font-bold">
+                              {isEnglishReport ? "J Wang" : "汪经理"}
+                            </td>
+                          </tr>
+                          <tr className="divide-x divide-slate-100">
+                            <td className="bg-slate-50 px-4 py-3 text-slate-500 font-bold">
+                              {isEnglishReport ? "Mobile" : "手机"}
+                            </td>
+                            <td className="px-4 py-3 text-slate-700 font-bold">181xxxxxxx</td>
+                            <td className="bg-slate-50 px-4 py-3 text-slate-500 font-bold">
+                              {isEnglishReport ? "Telephone" : "固定电话"}
+                            </td>
+                            <td className="px-4 py-3 text-slate-700 font-bold">021-xxxxxx</td>
+                          </tr>
+                          <tr className="divide-x divide-slate-100">
+                            <td className="bg-slate-50 px-4 py-3 text-slate-500 font-bold">
+                              {isEnglishReport ? "Email" : "电子邮箱"}
+                            </td>
+                            <td className="px-4 py-3 text-slate-700 font-bold" colSpan={3}>xxxx.wang@bsci.com</td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+
+                    <div className="rounded-2xl border border-amber-100 bg-amber-50/40 px-6 py-5">
+                      <div className="text-sm font-black text-amber-800 mb-2">
+                        {isEnglishReport ? "Confidential Notice" : "机密公告"}
+                      </div>
+                      <div className="text-[13px] leading-relaxed text-amber-900/80 space-y-1">
+                        {isEnglishReport ? (
+                          <>
+                            <div>This report and all attached forms or annexes may contain confidential information and are intended only for the designated recipient.</div>
+                            <div>Ownership of this report and all attached forms or annexes belongs to Boston Scientific International Medical Trading (Shanghai) Co., Ltd.</div>
+                            <div>If you are not the intended recipient, you must not review, disseminate, distribute, copy, or otherwise use this report or any of its attachments.</div>
+                          </>
+                        ) : (
+                          <>
+                            <div>本报告及所有附表或者附件可能包含机密信息，仅收件人才可使用。</div>
+                            <div>本报告及所有附表或者附件的所有权均属于波科国际医疗贸易（上海）有限公司。</div>
+                            <div>如果收件人为非指定的接收者，禁止浏览、传播、分发、拷贝或者以其他方式使用本报告及所有附表或者附件。</div>
+                          </>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="text-[13px] text-slate-600 leading-relaxed">
+                      {isEnglishReport
+                        ? "*Note: To maintain continuity of PRER data, the start date of this reporting period is the end date of the previous PRER for the prior certificate (NMPA Reg. No. 20173775044)."
+                        : "*注：为保持 PRER 数据的连续，本次报告周期的起始日期为该注册证旧证（国械注进20173775044）的定期风险评价报告的截止日期。"}
+                    </div>
+
+                    <div className="rounded-2xl border border-slate-200/70 bg-white overflow-hidden shadow-sm">
+                      <div className="px-6 py-4 border-b border-slate-100 bg-slate-50/40">
+                        <div className="text-sm font-black text-slate-800">
+                          {isEnglishReport ? "Table of Contents" : "目录"}
                         </div>
+                      </div>
+                      <div className="p-6">
+                        <table className="w-full text-[13px] border-collapse">
+                          <tbody className="divide-y divide-slate-100">
+                            {[
+                              isEnglishReport
+                                ? ["1. Basic Product Information", "1"]
+                                : ["1. 产品基本信息", "1"],
+                              isEnglishReport
+                                ? ["2. Domestic & Overseas Marketing Status", "2"]
+                                : ["2. 国内外上市情况", "2"],
+                              isEnglishReport
+                                ? ["2.1 Summary Table of Marketing Status", "2"]
+                                : ["2.1 国内外上市情况汇总表", "2"],
+                              isEnglishReport
+                                ? ["2.2 Requirements at Time of Approval", "2"]
+                                : ["2.2 产品批准上市时提出的有关要求", "2"],
+                              isEnglishReport
+                                ? ["2.3 Differences in Indications (Intended Use)", "2"]
+                                : ["2.3 适用范围（预期用途）差异", "2"],
+                              isEnglishReport
+                                ? ["3. Previous Risk Control Measures", "2"]
+                                : ["3. 既往风险控制措施", "2"],
+                              isEnglishReport
+                                ? ["4. Adverse Event Information", "3"]
+                                : ["4. 不良事件报告信息", "3"],
+                              isEnglishReport
+                                ? ["4.1 Individual Adverse Event Cases", "3"]
+                                : ["4.1 个例不良事件报告", "3"],
+                              isEnglishReport
+                                ? ["4.2 Summary Table of Individual Cases", "3"]
+                                : ["4.2 个例不良事件报告汇总表", "3"],
+                              isEnglishReport
+                                ? ["4.3 Cluster Adverse Events", "4"]
+                                : ["4.3 群体不良事件", "4"],
+                              isEnglishReport
+                                ? ["5. Other Risk Information", "4"]
+                                : ["5. 其他风险信息", "4"],
+                              isEnglishReport
+                                ? ["5.1 Literature Review Related to Product Risks", "4"]
+                                : ["5.1 产品风险相关的文献资料研究", "4"],
+                              isEnglishReport
+                                ? ["5.2 Product Risk Evaluation", "4"]
+                                : ["5.2 产品风险评价", "4"],
+                              isEnglishReport
+                                ? ["5.3 Key Monitoring Reports", "4"]
+                                : ["5.3 重点监测报告", "4"],
+                              isEnglishReport
+                                ? ["5.4 Re-evaluation Reports", "4"]
+                                : ["5.4 再评价报告", "4"],
+                              isEnglishReport
+                                ? ["6. Product Risk Analysis", "4"]
+                                : ["6. 产品风险分析", "4"],
+                              isEnglishReport
+                                ? ["6.1 Adverse Event Incidence Rate", "4"]
+                                : ["6.1 不良事件发生率", "4"],
+                              isEnglishReport
+                                ? ["6.2 Causes and Actions for Adverse Events", "5"]
+                                : ["6.2 不良事件发生原因及措施", "5"],
+                              isEnglishReport
+                                ? ["6.3 Comprehensive Risk Analysis", "5"]
+                                : ["6.3 综合风险分析", "5"],
+                              isEnglishReport
+                                ? ["7. Conclusion", "5"]
+                                : ["7. 评价结论", "5"],
+                              isEnglishReport
+                                ? ["8. Appendices", "6"]
+                                : ["8. 附件", "6"],
+                            ].map(([name, page]) => (
+                              <tr key={name} className="divide-x divide-slate-100">
+                                <td className="py-2 pr-4 text-slate-700 font-bold">{name}</td>
+                                <td className="py-2 pl-4 text-right text-slate-500 font-bold w-20">{page}</td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+
+                    <div className="space-y-4 pt-2">
+                      <div className="text-base font-black text-slate-900">
+                        {isEnglishReport ? "1. Basic Product Information" : "1. 产品基本信息"}
+                      </div>
+                      <div className="rounded-2xl border border-slate-200/70 overflow-hidden bg-white shadow-sm">
+                        <table className="w-full text-sm border-collapse">
+                          <tbody className="divide-y divide-slate-100">
+                            <tr className="divide-x divide-slate-100">
+                              <td className="w-52 bg-slate-50 px-4 py-3 text-slate-500 font-bold">
+                                {isEnglishReport ? "Medical Device Name" : "医疗器械名称"}
+                              </td>
+                              <td className="px-4 py-3 text-slate-700 font-bold">
+                                <div>{isEnglishReport ? "Radiofrequency Ablation Catheter" : "射频消融导管"}</div>
+                                <div className="text-[12px] text-slate-500 font-bold mt-1">HABIB EndoHPB</div>
+                              </td>
+                            </tr>
+                            <tr className="divide-x divide-slate-100">
+                              <td className="bg-slate-50 px-4 py-3 text-slate-500 font-bold">
+                                {isEnglishReport ? "Model and/or Specification" : "型号和/或者规格"}
+                              </td>
+                              <td className="px-4 py-3 text-slate-700 font-bold">M00500070</td>
+                            </tr>
+                            <tr className="divide-x divide-slate-100">
+                              <td className="bg-slate-50 px-4 py-3 text-slate-500 font-bold">
+                                {isEnglishReport ? "Registration Certificate No." : "注册证编号"}
+                              </td>
+                              <td className="px-4 py-3 text-slate-700 font-bold">国械注进20173015044</td>
+                            </tr>
+                            <tr className="divide-x divide-slate-100">
+                              <td className="bg-slate-50 px-4 py-3 text-slate-500 font-bold">
+                                {isEnglishReport ? "Structure and Components" : "结构及组成"}
+                              </td>
+                              <td className="px-4 py-3 text-slate-700 font-bold">
+                                {isEnglishReport
+                                  ? "The product consists of a catheter, electrodes, wires, a handle, and a Y-connector. It is a non-hydrated, single-use catheter sterilized by ethylene oxide (EO), with a shelf life of three years."
+                                  : "产品由导管、电极、电线、手柄和 Y 型连接器组成。产品为非水合性导管，一次性使用，环氧乙烷灭菌，有效期三年。"}
+                              </td>
+                            </tr>
+                            <tr className="divide-x divide-slate-100">
+                              <td className="bg-slate-50 px-4 py-3 text-slate-500 font-bold">
+                                {isEnglishReport ? "Main Materials" : "主要组成成分"}
+                              </td>
+                              <td className="px-4 py-3 text-slate-700 font-bold">
+                                {isEnglishReport ? "Not specified in the registration certificate" : "注册证未体现"}
+                              </td>
+                            </tr>
+                            <tr className="divide-x divide-slate-100">
+                              <td className="bg-slate-50 px-4 py-3 text-slate-500 font-bold">
+                                {isEnglishReport ? "Intended Use" : "适用范围（预期用途）"}
+                              </td>
+                              <td className="px-4 py-3 text-slate-700 font-bold">
+                                {isEnglishReport
+                                  ? "Used with the RITA 1500X RF generator to coagulate tissue during gastrointestinal and digestive tract procedures (including biliary and pancreatic ducts). Model M00500070 is used endoscopically."
+                                  : "产品与 RITA 1500X 射频发生器配合使用，用于在胃肠道、消化道（包括胆胰管）手术中对组织进行凝固。M00500070 经内窥镜使用。"}
+                              </td>
+                            </tr>
+                            <tr className="divide-x divide-slate-100">
+                              <td className="bg-slate-50 px-4 py-3 text-slate-500 font-bold">
+                                {isEnglishReport ? "Shelf Life" : "有效期"}
+                              </td>
+                              <td className="px-4 py-3 text-slate-700 font-bold">
+                                {isEnglishReport ? "Three years" : "有效期三年"}
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
                       </div>
                     </div>
                   </section>
                 </div>
 
-                <div className="px-10 py-6 bg-slate-50 border-t border-slate-100 flex items-center justify-end shrink-0 mt-auto">
+                <div className="px-10 py-4 bg-slate-50/60 border-t border-slate-100 flex items-center justify-end shrink-0 mt-auto">
                   <button
                     onClick={() => setIsFinalizeModalOpen(true)}
                     disabled={!isPreviewVerified && !hasScrolledToBottom}
-                    className="h-12 px-8 rounded-lg bg-clinical-blue text-white font-bold text-base flex items-center gap-2 shadow-lg shadow-clinical-blue/20 hover:bg-blue-700 transition-all active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="h-10 px-6 rounded-lg bg-clinical-blue text-white font-bold text-sm flex items-center gap-2 shadow-lg shadow-clinical-blue/20 hover:bg-blue-700 transition-all active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     <CheckCircle2 size={18} />
-                    确认并完成报告编制
+                    {isEnglishReport ? "Confirm & Finalize" : "确认并完成报告编制"}
                   </button>
                 </div>
               </motion.div>

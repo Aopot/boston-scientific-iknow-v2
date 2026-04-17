@@ -11,6 +11,17 @@ import AdminConsole from "@/components/AdminConsole";
 import LoginPage from "@/components/LoginPage";
 import Workbench from "@/components/Workbench";
 import Header from "@/components/Header";
+import MeetingUpload from "@/components/MeetingUpload";
+
+function MeetingMinutes() {
+  return (
+    <div className="h-full -mx-12 -mb-12 px-8 pt-2 pb-8 flex flex-col min-h-0">
+      <div className="flex-1 min-h-0">
+        <MeetingUpload />
+      </div>
+    </div>
+  );
+}
 
 export default function Dashboard() {
   const [activeTab, setActiveTab] = useState("home");
@@ -100,6 +111,19 @@ export default function Dashboard() {
             <AdminConsole />
           </motion.div>
         );
+      case "minutes":
+        return (
+          <motion.div
+            key="minutes"
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -20 }}
+            transition={{ duration: 0.3 }}
+            className="h-full"
+          >
+            <MeetingMinutes />
+          </motion.div>
+        );
       default:
         return null;
     }
@@ -116,7 +140,11 @@ export default function Dashboard() {
         <Header activeTab={activeTab} onLogout={() => setIsLoggedIn(false)} />
 
         {/* Dynamic Content Area */}
-        <div className="flex-1 overflow-hidden p-12 pt-4">
+        <div
+          className={`flex-1 overflow-hidden pt-3 ${
+            activeTab === "qa" ? "p-4 pt-2" : "p-12 pt-3"
+          }`}
+        >
           <AnimatePresence mode="wait">
             {renderContent()}
           </AnimatePresence>

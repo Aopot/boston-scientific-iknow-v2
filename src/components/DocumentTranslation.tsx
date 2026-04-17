@@ -12,7 +12,6 @@ import {
   Copy, 
   ChevronRight, 
   Loader2,
-  ExternalLink,
   Search,
   ArrowRight
 } from "lucide-react";
@@ -98,7 +97,7 @@ export default function DocumentTranslation() {
                   <BookOpen size={18} className="text-clinical-blue" />
                   <div className="flex flex-col">
                     <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">术语库预设</span>
-                    <span className="text-sm font-bold text-slate-700">BSCI Cardiovascular Terminology v4.2</span>
+                    <span className="text-sm font-bold text-slate-700">S842773-00_Global_Glossary_Rev_CK_final</span>
                   </div>
                   <ChevronRight size={16} className="ml-2 text-slate-300" />
                 </div>
@@ -186,7 +185,7 @@ export default function DocumentTranslation() {
                 <div className="h-4 w-px bg-slate-200" />
                 <div className="flex items-center gap-3">
                   <FileText size={18} className="text-clinical-blue" />
-                  <span className="text-sm font-bold text-slate-800 tracking-tight">Promus PREMIER™ Technical Guide.pdf</span>
+                  <span className="text-sm font-bold text-slate-800 tracking-tight">Global WI Risk Management Plan and Report.docx</span>
                 </div>
               </div>
 
@@ -214,21 +213,60 @@ export default function DocumentTranslation() {
                     <div className="w-2 h-2 rounded-full bg-slate-200" />
                   </div>
                 </div>
-                <div className="flex-1 p-10 overflow-y-auto custom-scrollbar opacity-50 grayscale hover:opacity-70 transition-all cursor-not-allowed select-none">
-                  <div className="space-y-6">
-                    <div className="h-8 bg-slate-300 rounded-lg w-3/4" />
-                    <div className="space-y-3">
-                      <div className="h-4 bg-slate-200 rounded-md w-full" />
-                      <div className="h-4 bg-slate-200 rounded-md w-full" />
-                      <div className="h-4 bg-slate-200 rounded-md w-5/6" />
-                    </div>
-                    <div className="h-48 bg-slate-200 rounded-2xl w-full" />
-                    <div className="space-y-3 pt-4">
-                      <div className="h-4 bg-slate-200 rounded-md w-full" />
-                      <div className="h-4 bg-slate-200 rounded-md w-full" />
-                      <div className="h-4 bg-slate-200 rounded-md w-2/3" />
-                    </div>
-                  </div>
+                <div className="flex-1 p-8 overflow-y-auto custom-scrollbar">
+                  <pre className="whitespace-pre-wrap text-[13px] leading-relaxed text-slate-700 font-medium">
+{`Global WI Risk Management Plan and Report
+
+Purpose
+This document describes the process for executing the Risk Management Plan and Report requirements for product risks.
+This document provides a framework within which experience, insight, data, and judgment are applied systematically to manage the risks associated with the use of BSC medical devices.
+
+Scope
+This global work instruction applies to the products designed, developed, or modified by Boston Scientific throughout the entire product lifecycle. Product refers to the device, package, label, system, sub-system, software, and/or services.
+
+Records Created
+Risk Management Plan (RMP)
+Risk Management Report (RMR)
+Risk Management Competency Summary
+
+Table of Contents
+1. Overview
+  1.1. Risk Management Plan & Report Process Flow
+  1.2. Responsibilities
+2. Develop a Risk Management Plan
+  2.1. Identify Scope
+  2.2. Identify Responsibilities and Authorities
+  2.3. Identify Risk Estimation Scales
+  2.4. Identify Risk Acceptance Criteria
+  2.5. Identify Risk Criticality Zones (optional)
+  2.6. Identify Software Safety Classification
+  2.7. Identify the Review of Risk Management Activities
+  2.8. Identify Verification Methods
+  2.9. Identify Production and Post-Production Methods
+3. Approve and Store the Risk Management Plan Record
+  3.1. Approval Requirements
+4. Develop a Risk Management Report
+  4.1. Identify Scope
+  4.2. Identify Deviations
+  4.3. Identify Risk Management File
+  4.4. Identify Additional References
+  4.5. Establish Risk Thresholds
+  4.6. Evaluate Risk Acceptability
+  4.7. Identify Production and Post-Production Methods
+  4.8. Document Conclusions
+5. Approve and Store the Risk Management Report Record
+  5.1. Approval Requirements
+6. Maintenance
+  6.1. Update the Risk Management Plan and/or Report
+  6.2. Update the Risk Management Competency Summary
+7. Supporting Information
+  7.1. Definitions
+  7.2. Applicable Documents
+Appendix A. Pre-Determined Risk Acceptability Matrices
+Appendix B. Examples of Risk Acceptability Matrices
+Appendix C. Risk Criticality Zones
+Appendix D. Risk Index Matrix`}
+                  </pre>
                 </div>
               </div>
 
@@ -243,49 +281,129 @@ export default function DocumentTranslation() {
                 </div>
                 <div className="flex-1 p-10 overflow-y-auto custom-scrollbar">
                   <div className="prose prose-slate max-w-none">
-                    <h2 className="text-2xl font-bold text-slate-900 mb-6">Promus PREMIER™ Everolimus 依维莫司洗脱冠状动脉支架系统</h2>
+                    <h2 className="text-2xl font-bold text-slate-900 mb-6">全球工作指导书：风险管理计划与报告</h2>
                     <p className="text-slate-600 leading-relaxed mb-6">
-                      Promus PREMIER™ 支架系统是 Boston Scientific 开发的下一代支架技术。该系统采用专有的
+                      本文件描述用于执行产品风险相关
                       <span className="mx-1 px-1.5 py-0.5 bg-blue-50 text-clinical-blue rounded-md border border-blue-100 font-bold relative group cursor-help">
-                        Biolimus A9™
+                        风险管理计划（RMP）
                         <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 bg-slate-800 text-white text-[10px] rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 shadow-xl pointer-events-none">
                           <span className="block font-bold text-blue-400 mb-1 italic underline decoration-blue-400/30 underline-offset-2">匹配术语库 v4.2</span>
-                          专有药物涂层技术，旨在优化支架植入后的血管愈合。
+                          Risk Management Plan（RMP）
                         </span>
                       </span>
-                      药物涂层，旨在最大限度地减少
+                      与
                       <span className="mx-1 px-1.5 py-0.5 bg-blue-50 text-clinical-blue rounded-md border border-blue-100 font-bold relative group cursor-help">
-                        血管支架 (Vascular Stent)
+                        风险管理报告（RMR）
                         <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 bg-slate-800 text-white text-[10px] rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 shadow-xl pointer-events-none">
                           <span className="block font-bold text-blue-400 mb-1 italic underline decoration-blue-400/30 underline-offset-2">匹配术语库 v4.2</span>
-                          用于保持冠状动脉管腔开放的医疗器械。
+                          Risk Management Report（RMR）
                         </span>
                       </span>
-                      内膜增生。
+                      相关要求的流程；并提供一个框架，使经验、洞察、数据与判断能够被系统性地应用于管理 Boston Scientific 医疗器械使用相关风险。
                     </p>
                     <div className="p-6 bg-slate-50 rounded-2xl border border-slate-100 mb-6">
                       <h4 className="text-sm font-bold text-slate-800 mb-3 flex items-center gap-2">
                         <Search size={14} className="text-clinical-blue" />
-                        主要技术规格:
+                        适用范围（Scope）:
                       </h4>
-                      <ul className="space-y-2 text-sm text-slate-600">
-                        <li className="flex justify-between">
-                          <span>支架材料:</span>
-                          <span className="font-bold text-slate-800">铂铬合金 (PtCr)</span>
-                        </li>
-                        <li className="flex justify-between">
-                          <span>涂层厚度:</span>
-                          <span className="font-bold text-slate-800">~7.0 μm</span>
-                        </li>
-                        <li className="flex justify-between">
-                          <span>交付系统:</span>
-                          <span className="font-bold text-slate-800">Monorail™ 快速交换系统</span>
-                        </li>
-                      </ul>
+                      <p className="text-sm text-slate-600 leading-relaxed">
+                        本全球工作指导书适用于 Boston Scientific 在整个
+                        <span className="mx-1 px-1.5 py-0.5 bg-blue-50 text-clinical-blue rounded-md border border-blue-100 font-bold relative group cursor-help">
+                          产品全生命周期
+                          <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 bg-slate-800 text-white text-[10px] rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 shadow-xl pointer-events-none">
+                            <span className="block font-bold text-blue-400 mb-1 italic underline decoration-blue-400/30 underline-offset-2">匹配术语库 v4.2</span>
+                            Product lifecycle
+                          </span>
+                        </span>
+                        内设计、开发或变更的产品。此处“产品”包括器械、包装、标签、系统、子系统、软件和/或服务。
+                      </p>
                     </div>
-                    <p className="text-slate-600 leading-relaxed">
-                      该支架系统集成了增强的可视性技术，确保在介入手术过程中能够实现精准的定位。
-                    </p>
+                    <h3 className="text-lg font-bold text-slate-900 mt-8 mb-4">记录创建（Records Created）</h3>
+                    <ul className="text-sm text-slate-600 leading-relaxed">
+                      <li>
+                        风险管理计划（RMP）
+                      </li>
+                      <li>
+                        风险管理报告（RMR）
+                      </li>
+                      <li>
+                        风险管理胜任力汇总（Risk Management Competency Summary）
+                      </li>
+                    </ul>
+
+                    <h3 className="text-lg font-bold text-slate-900 mt-8 mb-4">目录（Table of Contents）</h3>
+                    <div className="p-6 bg-white rounded-2xl border border-slate-100">
+                      <ol className="space-y-2 text-sm text-slate-600">
+                        <li>1. 概述</li>
+                        <li className="pl-4">1.1 风险管理计划与报告流程</li>
+                        <li className="pl-4">1.2 职责</li>
+                        <li>2. 制定风险管理计划</li>
+                        <li className="pl-4">2.1 确定范围</li>
+                        <li className="pl-4">2.2 确定职责与权限</li>
+                        <li className="pl-4">
+                          2.3 确定
+                          <span className="mx-1 px-1.5 py-0.5 bg-blue-50 text-clinical-blue rounded-md border border-blue-100 font-bold relative group cursor-help">
+                            风险估计量表
+                            <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 bg-slate-800 text-white text-[10px] rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 shadow-xl pointer-events-none">
+                              <span className="block font-bold text-blue-400 mb-1 italic underline decoration-blue-400/30 underline-offset-2">匹配术语库 v4.2</span>
+                              Risk Estimation Scales
+                            </span>
+                          </span>
+                        </li>
+                        <li className="pl-4">
+                          2.4 确定
+                          <span className="mx-1 px-1.5 py-0.5 bg-blue-50 text-clinical-blue rounded-md border border-blue-100 font-bold relative group cursor-help">
+                            风险可接受准则
+                            <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 bg-slate-800 text-white text-[10px] rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 shadow-xl pointer-events-none">
+                              <span className="block font-bold text-blue-400 mb-1 italic underline decoration-blue-400/30 underline-offset-2">匹配术语库 v4.2</span>
+                              Risk Acceptance Criteria
+                            </span>
+                          </span>
+                        </li>
+                        <li className="pl-4">
+                          2.5 确定
+                          <span className="mx-1 px-1.5 py-0.5 bg-blue-50 text-clinical-blue rounded-md border border-blue-100 font-bold relative group cursor-help">
+                            风险关键性分区
+                            <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 bg-slate-800 text-white text-[10px] rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 shadow-xl pointer-events-none">
+                              <span className="block font-bold text-blue-400 mb-1 italic underline decoration-blue-400/30 underline-offset-2">匹配术语库 v4.2</span>
+                              Risk Criticality Zones（optional）
+                            </span>
+                          </span>
+                          （可选）
+                        </li>
+                        <li className="pl-4">
+                          2.6 确定软件安全分类（Software Safety Classification）
+                        </li>
+                        <li className="pl-4">2.7 确定风险管理活动的评审</li>
+                        <li className="pl-4">2.8 确定验证方法</li>
+                        <li className="pl-4">
+                          2.9 确定生产与上市后方法（Production and Post-Production Methods）
+                        </li>
+                        <li>3. 批准并归档风险管理计划记录</li>
+                        <li className="pl-4">3.1 批准要求</li>
+                        <li>4. 编制风险管理报告</li>
+                        <li className="pl-4">4.1 确定范围</li>
+                        <li className="pl-4">4.2 确定偏差</li>
+                        <li className="pl-4">4.3 确定风险管理文件（Risk Management File）</li>
+                        <li className="pl-4">4.4 确定附加参考</li>
+                        <li className="pl-4">4.5 建立风险阈值</li>
+                        <li className="pl-4">4.6 评估风险可接受性</li>
+                        <li className="pl-4">4.7 确定生产与上市后方法</li>
+                        <li className="pl-4">4.8 形成结论</li>
+                        <li>5. 批准并归档风险管理报告记录</li>
+                        <li className="pl-4">5.1 批准要求</li>
+                        <li>6. 维护</li>
+                        <li className="pl-4">6.1 更新风险管理计划和/或报告</li>
+                        <li className="pl-4">6.2 更新风险管理胜任力汇总</li>
+                        <li>7. 支持性信息</li>
+                        <li className="pl-4">7.1 定义</li>
+                        <li className="pl-4">7.2 适用文件</li>
+                        <li>附录 A：预设风险可接受矩阵</li>
+                        <li>附录 B：风险可接受矩阵示例</li>
+                        <li>附录 C：风险关键性分区</li>
+                        <li>附录 D：风险指数矩阵</li>
+                      </ol>
+                    </div>
                   </div>
                 </div>
                 

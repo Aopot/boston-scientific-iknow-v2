@@ -1,6 +1,6 @@
 "use client";
 
-import { MessageSquare, FilePlus, Languages, Lock, ChevronRight, Database, Settings, LayoutDashboard } from "lucide-react";
+import { MessageSquare, FilePlus, Languages, Lock, ChevronRight, Database, Settings, LayoutDashboard, Mic } from "lucide-react";
 import { motion } from "framer-motion";
 
 interface SidebarProps {
@@ -14,6 +14,7 @@ export default function Sidebar({ activeTab, setActiveTab }: SidebarProps) {
     { id: "qa", label: "知识问答", icon: MessageSquare, disabled: false },
     { id: "gen", label: "文档生成", icon: FilePlus, disabled: false },
     { id: "trans", label: "文档翻译", icon: Languages, disabled: false },
+    { id: "minutes", label: "会议纪要", icon: Mic, disabled: false },
     { id: "mgmt", label: "知识库管理", icon: Database, disabled: false },
     { id: "admin", label: "管理员控制台", icon: Settings, disabled: false },
   ];

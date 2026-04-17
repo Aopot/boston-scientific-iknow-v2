@@ -8,8 +8,7 @@ import {
   Settings, 
   Shield, 
   HelpCircle, 
-  LogOut,
-  ChevronRight
+  LogOut
 } from "lucide-react";
 
 interface HeaderProps {
@@ -21,61 +20,10 @@ export default function Header({ activeTab, onLogout }: HeaderProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [hasNotification, setHasNotification] = useState(true);
 
-  // Breadcrumb mapping logic
-  const getBreadcrumbs = () => {
-    switch (activeTab) {
-      case "home":
-        return [{ label: "首页", current: true }];
-      case "qa":
-        return [
-          { label: "知识问答", current: false },
-          { label: "临床技术支持", current: true }
-        ];
-      case "gen":
-        return [
-          { label: "写报告", current: false },
-          { label: "定期风险评估报告 (PRER)", current: true }
-        ];
-      case "trans":
-        return [
-          { label: "文档翻译", current: false },
-          { label: "医学文献转换", current: true }
-        ];
-      case "mgmt":
-        return [
-          { label: "知识库管理", current: false },
-          { label: "部门数据源", current: true }
-        ];
-      case "admin":
-        return [
-          { label: "管理员控制台", current: false },
-          { label: "系统审计与配置", current: true }
-        ];
-      default:
-        return [{ label: "首页", current: true }];
-    }
-  };
-
-  const breadcrumbs = getBreadcrumbs();
-
   return (
-    <header className="sticky top-0 z-40 flex items-center justify-between h-20 mb-8 shrink-0 bg-background/80 backdrop-blur-md border-b border-slate-100 px-2">
-      {/* Left: Breadcrumbs */}
-      <nav className="flex items-center gap-3">
-        {breadcrumbs.map((crumb, index) => (
-          <div key={index} className="flex items-center gap-3">
-            {index > 0 && <ChevronRight size={14} className="text-slate-300" />}
-            <span className={`text-sm tracking-tight ${
-              crumb.current 
-                ? "text-slate-800 font-semibold" 
-                : "text-slate-400 font-medium"
-            }`}>
-              {crumb.label}
-            </span>
-          </div>
-        ))}
-      </nav>
-
+    <header
+      className="sticky top-0 z-40 flex items-center justify-end h-16 shrink-0 bg-background/80 backdrop-blur-md border-b border-slate-100 px-2 mb-4"
+    >
       <div className="flex items-center gap-6">
         {/* Notifications */}
         <button className="relative p-2.5 bg-white border border-slate-200 rounded-xl text-slate-500 hover:text-clinical-blue hover:border-clinical-blue/20 transition-all shadow-sm">

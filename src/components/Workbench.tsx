@@ -1,11 +1,11 @@
 "use client";
 
-import { motion } from "framer-motion";
 import { 
   MessageSquare, 
   FilePlus, 
   Languages, 
   Database, 
+  Mic,
   TrendingUp, 
   Clock, 
   ChevronRight, 
@@ -25,6 +25,7 @@ export default function Workbench({ onNavigate }: WorkbenchProps) {
     { id: "gen", label: "生成合规报告", icon: FilePlus, color: "bg-emerald-50 text-emerald-600", desc: "快速编制 PRER/SOP 等文档" },
     { id: "trans", label: "专业文档翻译", icon: Languages, color: "bg-indigo-50 text-indigo-600", desc: "集成术语库的高精度翻译" },
     { id: "mgmt", label: "管理数据源", icon: Database, color: "bg-amber-50 text-amber-600", desc: "配置部门级知识库权限" },
+    { id: "minutes", label: "会议纪要生成", icon: Mic, color: "bg-violet-50 text-violet-600", desc: "上传会议录音，AI 自动提取关键决策与待办事项" },
   ];
 
   const recentActivities = [
