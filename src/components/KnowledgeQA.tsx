@@ -11,6 +11,14 @@ interface Message {
   sources?: string[];
 }
 
+type DashscopeChatCompletionChunk = {
+  choices?: Array<{
+    delta?: {
+      content?: string;
+    };
+  }>;
+};
+
 let messageIdSeed = 1;
 const nextMessageId = () => `m-${messageIdSeed++}`;
 
@@ -29,6 +37,7 @@ export default function KnowledgeQA() {
   const [typingVersion, setTypingVersion] = useState(0);
   const scrollRef = useRef<HTMLDivElement>(null);
   const typingTimerRef = useRef<number | null>(null);
+  const streamAbortRef = useRef<AbortController | null>(null);
 
   const demoQAs = [
     {
@@ -79,6 +88,9 @@ export default function KnowledgeQA() {
       if (typingTimerRef.current) {
         window.clearInterval(typingTimerRef.current);
       }
+      if (streamAbortRef.current) {
+        streamAbortRef.current.abort();
+      }
     };
   }, []);
 
@@ -93,6 +105,10 @@ export default function KnowledgeQA() {
   };
 
   const startTypewriter = (fullText: string, sources?: string[]) => {
+    if (streamAbortRef.current) {
+      streamAbortRef.current.abort();
+      streamAbortRef.current = null;
+    }
     if (typingTimerRef.current) {
       window.clearInterval(typingTimerRef.current);
       typingTimerRef.current = null;
@@ -139,6 +155,118 @@ export default function KnowledgeQA() {
     }, intervalMs);
   };
 
+  const startDashscopeStream = async (userText: string, history: Message[]) => {
+    if (typingTimerRef.current) {
+      window.clearInterval(typingTimerRef.current);
+      typingTimerRef.current = null;
+    }
+    if (streamAbortRef.current) {
+      streamAbortRef.current.abort();
+    }
+
+    const controller = new AbortController();
+    streamAbortRef.current = controller;
+
+    const id = nextMessageId();
+    setTypingMessageId(id);
+    setTypingVersion((v) => v + 1);
+    setMessages((prev) => [...prev, { id, type: "ai", content: "" }]);
+
+    const historyMessages = history
+      .filter((m) => m.type === "user" || m.type === "ai")
+      .filter((m) => m.id !== "1")
+      .slice(-10)
+      .map((m) => ({
+        role: m.type === "user" ? ("user" as const) : ("assistant" as const),
+        content: m.content,
+      }))
+      .filter((m) => m.content.trim().length > 0);
+
+    const messagesToSend = [
+      {
+        role: "system" as const,
+        content:
+          "你是 Boston Scientific 的合规/质量体系助手。请用中文回答，结构清晰、可落地；如信息不足，先列出需要补充的关键信息再给出建议。",
+      },
+      ...historyMessages,
+      { role: "user" as const, content: userText },
+    ];
+
+    let accumulated = "";
+    try {
+      const res = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ messages: messagesToSend }),
+        signal: controller.signal,
+      });
+
+      if (!res.ok) {
+        const text = await res.text().catch(() => "");
+        const errText = `请求失败（${res.status}）：${text || "请检查 DASHSCOPE_API_KEY / DASHSCOPE_MODEL 配置"}`;
+        setMessages((prev) => prev.map((m) => (m.id === id ? { ...m, content: errText } : m)));
+        setTypingVersion((v) => v + 1);
+        return;
+      }
+
+      if (!res.body) {
+        setMessages((prev) =>
+          prev.map((m) => (m.id === id ? { ...m, content: "响应为空，请稍后重试。" } : m)),
+        );
+        setTypingVersion((v) => v + 1);
+        return;
+      }
+
+      const decoder = new TextDecoder("utf-8");
+      const reader = res.body.getReader();
+      let buffer = "";
+
+      while (true) {
+        const { value, done } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+
+        const lines = buffer.split(/\r?\n/);
+        buffer = lines.pop() ?? "";
+
+        for (const line of lines) {
+          const trimmed = line.trim();
+          if (!trimmed.startsWith("data:")) continue;
+          const data = trimmed.slice(5).trim();
+          if (!data) continue;
+          if (data === "[DONE]") {
+            buffer = "";
+            break;
+          }
+
+          try {
+            const json = JSON.parse(data) as unknown as DashscopeChatCompletionChunk;
+            const delta = json.choices?.[0]?.delta?.content;
+            if (typeof delta === "string" && delta.length > 0) {
+              accumulated += delta;
+              setMessages((prev) =>
+                prev.map((m) => (m.id === id ? { ...m, content: accumulated } : m)),
+              );
+              setTypingVersion((v) => v + 1);
+            }
+          } catch {
+            continue;
+          }
+        }
+      }
+    } catch (e: unknown) {
+      if (e instanceof DOMException && e.name === "AbortError") return;
+      const message = e instanceof Error ? e.message : "未知错误";
+      const errText = `请求异常：${message}`;
+      setMessages((prev) => prev.map((m) => (m.id === id ? { ...m, content: errText } : m)));
+      setTypingVersion((v) => v + 1);
+    } finally {
+      setIsTyping(false);
+      setTypingMessageId(null);
+      streamAbortRef.current = null;
+    }
+  };
+
   const pushDemo = (demoId: (typeof demoQAs)[number]["id"]) => {
     if (isTyping) return;
     const demo = demoQAs.find((d) => d.id === demoId);
@@ -166,10 +294,8 @@ export default function KnowledgeQA() {
         startTypewriter(`类型：${demo.typeLabel}\n\n${demo.answer}`, [...demo.sources]);
         return;
       }
-      startTypewriter(
-        "当前为演示模式：我已内置 3 个示例问答（内容检索 / 文档对比 / 推理总结）。\n你可以直接点击上方示例问题，或在输入框里粘贴示例问题来查看对应答案。",
-      );
-    }, 450);
+      startDashscopeStream(text, [...messages, userMsg]);
+    }, 200);
   };
 
   return (
@@ -288,7 +414,7 @@ export default function KnowledgeQA() {
           />
           <button
             onClick={handleSend}
-            disabled={!input.trim()}
+            disabled={!input.trim() || isTyping}
             className="absolute right-3 top-1/2 -translate-y-1/2 p-3 rounded-xl bg-clinical-blue text-white hover:bg-blue-700 transition-colors disabled:opacity-30 disabled:cursor-not-allowed shadow-lg shadow-clinical-blue/20"
           >
             <Send size={20} />
